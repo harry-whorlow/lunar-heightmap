@@ -28,8 +28,6 @@ export function createCameraRig(
   const aim = new THREE.Vector3();
   const pose = new THREE.Camera();
 
-  // Further out, aim shifts from the limb toward the moon's centre so the
-  // whole disc stays framed.
   const setHome = (distance: number) => {
     homePosition.copy(homeDirection).multiplyScalar(distance);
     const t = THREE.MathUtils.clamp(

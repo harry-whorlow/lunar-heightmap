@@ -35,7 +35,7 @@ if (canvas) {
 
   const rig = createCameraRig(camera, {
     position: new THREE.Vector3(0, 1.05, 1.4),
-    target: new THREE.Vector3(0, 1.05, 0),
+    target: new THREE.Vector3(0, 0.95, 0),
     minRadius: 1.25,
     maxRadius: 6,
   });
@@ -44,12 +44,11 @@ if (canvas) {
     rig.setFree(freeCamInput.checked),
   );
 
-  const distance = () => Number(distanceInput?.value ?? 1.75);
+  const altitudeKm = () => Number(distanceInput?.value ?? 1300);
   const updateDistance = () => {
-    rig.setDistance(distance());
+    rig.setDistance(1 + altitudeKm() / MOON_RADIUS_KM);
     if (distanceValue) {
-      const altitudeKm = Math.round((distance() - 1) * MOON_RADIUS_KM);
-      distanceValue.value = `${altitudeKm.toLocaleString()} km`;
+      distanceValue.value = `${altitudeKm().toLocaleString()} km`;
     }
   };
   distanceInput?.addEventListener("input", updateDistance);
@@ -82,6 +81,7 @@ if (canvas) {
   const geometry = new MoonGeometry(data, exaggeration());
   const contourInterval = () => Number(contourInput?.value ?? 1);
   const material = createTopoMaterial({
+    heightMap: geometry.heightTexture,
     minKm: data.meta.minKm,
     maxKm: data.meta.maxKm,
     contourIntervalKm: contourInterval(),
