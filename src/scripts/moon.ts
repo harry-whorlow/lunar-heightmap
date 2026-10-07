@@ -4,9 +4,14 @@ import { loadHeightMap, MoonGeometry } from "./moon-geometry";
 import { createTopoMaterial } from "./moon-material";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#moon-canvas");
-const exaggerationInput = document.querySelector<HTMLInputElement>("#exaggeration");
-const exaggerationValue = document.querySelector<HTMLOutputElement>("#exaggeration-value");
+const exaggerationInput =
+  document.querySelector<HTMLInputElement>("#exaggeration");
+const exaggerationValue = document.querySelector<HTMLOutputElement>(
+  "#exaggeration-value",
+);
 const contourInput = document.querySelector<HTMLSelectElement>("#contours");
+const heatmapInput = document.querySelector<HTMLInputElement>("#heatmap");
+const surfaceInput = document.querySelector<HTMLInputElement>("#surface");
 
 if (canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -50,6 +55,8 @@ if (canvas) {
     minKm: data.meta.minKm,
     maxKm: data.meta.maxKm,
     contourIntervalKm: contourInterval(),
+    heatmap: heatmapInput?.checked ?? true,
+    surface: surfaceInput?.checked ?? true,
   });
   scene.add(new THREE.Mesh(geometry, material));
 
@@ -64,5 +71,17 @@ if (canvas) {
     });
   });
 
-  contourInput?.addEventListener("change", () => material.setContourInterval(contourInterval()));
+  contourInput?.addEventListener("change", () =>
+    material.setContourInterval(contourInterval()),
+  );
+  heatmapInput?.addEventListener("change", () =>
+    material.setHeatmap(heatmapInput.checked),
+  );
+  surfaceInput?.addEventListener("change", () => {
+    if (!surfaceInput.checked && contourInput && contourInterval() === 0) {
+      contourInput.value = "1";
+      material.setContourInterval(1);
+    }
+    material.setSurface(surfaceInput.checked);
+  });
 }
