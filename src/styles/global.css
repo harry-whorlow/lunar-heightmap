@@ -38,6 +38,11 @@ body {
   width: 100%;
   height: 100%;
   touch-action: none;
+  cursor: grab;
+}
+
+#moon-canvas.dragging {
+  cursor: grabbing;
 }
 
 .controls {
@@ -74,4 +79,8 @@ body {
 .control input[type="checkbox"] {
   margin: 0;
   accent-color: #f1f0eb;
+}
+
+#distance-value {
+  min-width: 8ch;
 }

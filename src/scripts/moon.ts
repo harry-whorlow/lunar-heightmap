@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { createCameraRig } from "./camera-rig";
+import { createSpinControls } from "./spin-controls";
 import { loadHeightMap, MoonGeometry } from "./moon-geometry";
 import { createTopoMaterial } from "./moon-material";
 
@@ -12,6 +13,12 @@ const exaggerationValue = document.querySelector<HTMLOutputElement>(
 const contourInput = document.querySelector<HTMLSelectElement>("#contours");
 const heatmapInput = document.querySelector<HTMLInputElement>("#heatmap");
 const surfaceInput = document.querySelector<HTMLInputElement>("#surface");
+const freeCamInput = document.querySelector<HTMLInputElement>("#free-cam");
+const distanceInput = document.querySelector<HTMLInputElement>("#distance");
+const distanceValue =
+  document.querySelector<HTMLOutputElement>("#distance-value");
+
+const MOON_RADIUS_KM = 1737.4;
 
 if (canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -19,7 +26,6 @@ if (canvas) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 100);
-  camera.position.set(0, 0, 4);
   scene.add(camera);
 
   const sun = new THREE.DirectionalLight(0xffffff, 2.5);
@@ -27,11 +33,31 @@ if (canvas) {
   camera.add(sun);
   scene.add(new THREE.AmbientLight(0xffffff, 0.35));
 
-  const controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = true;
-  controls.enablePan = false;
-  controls.minDistance = 1.2;
-  controls.maxDistance = 10;
+  const rig = createCameraRig(camera, {
+    position: new THREE.Vector3(0, 1.05, 1.4),
+    target: new THREE.Vector3(0, 1.05, 0),
+    minRadius: 1.25,
+    maxRadius: 6,
+  });
+  rig.setFree(freeCamInput?.checked ?? false);
+  freeCamInput?.addEventListener("change", () =>
+    rig.setFree(freeCamInput.checked),
+  );
+
+  const distance = () => Number(distanceInput?.value ?? 1.75);
+  const updateDistance = () => {
+    rig.setDistance(distance());
+    if (distanceValue) {
+      const altitudeKm = Math.round((distance() - 1) * MOON_RADIUS_KM);
+      distanceValue.value = `${altitudeKm.toLocaleString()} km`;
+    }
+  };
+  distanceInput?.addEventListener("input", updateDistance);
+  updateDistance();
+
+  const moon = new THREE.Group();
+  scene.add(moon);
+  const spin = createSpinControls(moon, camera, canvas, { autoSpeed: 0.02 });
 
   const resize = () => {
     const { clientWidth, clientHeight } = canvas;
@@ -42,8 +68,12 @@ if (canvas) {
   new ResizeObserver(resize).observe(canvas);
   resize();
 
-  renderer.setAnimationLoop(() => {
-    controls.update();
+  const timer = new THREE.Timer();
+  renderer.setAnimationLoop((time) => {
+    timer.update(time);
+    const dt = Math.min(timer.getDelta(), 0.1);
+    rig.update(dt);
+    spin.update(dt);
     renderer.render(scene, camera);
   });
 
@@ -58,7 +88,7 @@ if (canvas) {
     heatmap: heatmapInput?.checked ?? true,
     surface: surfaceInput?.checked ?? true,
   });
-  scene.add(new THREE.Mesh(geometry, material));
+  moon.add(new THREE.Mesh(geometry, material));
 
   let pending = false;
   exaggerationInput?.addEventListener("input", () => {
