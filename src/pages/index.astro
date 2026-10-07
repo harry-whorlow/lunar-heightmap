@@ -1,0 +1,71 @@
+---
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/moon.svg" />
+    <meta
+      name="description"
+      content="An interactive, three-dimensional study of the lunar surface."
+    />
+    <meta name="theme-color" content="#090b10" />
+    <title>Lunar Heightmap — A study of the Moon</title>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="site-header">
+        <a class="wordmark" href="/" aria-label="Lunar Heightmap home">
+          <span class="wordmark-mark" aria-hidden="true"></span>
+          <span>LUNAR<br />HEIGHTMAP</span>
+        </a>
+        <span class="header-note">FIELD STUDY&nbsp; / &nbsp;001</span>
+      </header>
+
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> A DIGITAL OBSERVATORY</p>
+          <h1 id="hero-title">The Moon,<br /><em>in relief.</em></h1>
+          <p class="intro">
+            A closer look at our nearest neighbor. Explore a small, interactive
+            study of the lunar surface, shaped by ancient impacts and endless
+            time.
+          </p>
+          <a class="explore-link" href="#surface">
+            <span class="explore-icon" aria-hidden="true">↓</span>
+            <span>EXPLORE THE SURFACE</span>
+          </a>
+        </div>
+
+        <div class="moon-stage" id="surface">
+          <div class="orbit orbit-outer" aria-hidden="true"></div>
+          <div class="orbit orbit-inner" aria-hidden="true"></div>
+          <div class="moon-glow" aria-hidden="true"></div>
+          <canvas
+            id="moon-canvas"
+            aria-label="Interactive three-dimensional model of a cratered moon"
+          ></canvas>
+          <p class="stage-caption"><span>01</span> LUNAR HIGHLANDS</p>
+          <p class="stage-hint">DRAG TO ROTATE</p>
+        </div>
+
+        <div class="coordinates" aria-hidden="true">
+          <span>LAT&nbsp; 28° 24′ N</span>
+          <span>LON&nbsp; 17° 24′ W</span>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <span>AN EXPLORATION OF OUR CELESTIAL NEIGHBOR</span>
+        <span>EST. 4.5 BILLION YEARS AGO</span>
+      </footer>
+    </main>
+
+    <script>
+      import "../scripts/moon";
+    </script>
+  </body>
+</html>
