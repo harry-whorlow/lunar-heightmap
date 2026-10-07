@@ -1,0 +1,29 @@
+:root {
+  color-scheme: dark;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #090b10;
+  color: #f1f0eb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --muted: #858893;
+  --mono: "SFMono-Regular", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 74% 45%, rgb(31 35 46 / 36%), transparent 45%),
+    #090b10;
+}
