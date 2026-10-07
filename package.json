@@ -6,13 +6,15 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sample": "node scripts/build-heightmap.ts"
   },
   "dependencies": {
     "astro": "^7.3.6",
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@types/node": "^26.6.4",
     "@types/three": "^0.186.0",
     "typescript": "^7.0.2"
   }
