@@ -17,7 +17,9 @@ export interface HeightMapData {
   heights: Int16Array;
 }
 
-export async function loadHeightMap(baseUrl = "/data"): Promise<HeightMapData> {
+export async function loadHeightMap(
+  baseUrl = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/data`,
+): Promise<HeightMapData> {
   const meta: HeightMapMeta = await (await fetch(`${baseUrl}/moon.json`)).json();
   const buffer = await (await fetch(`${baseUrl}/${meta.file}`)).arrayBuffer();
   const heights = new Int16Array(buffer);
