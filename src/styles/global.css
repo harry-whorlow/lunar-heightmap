@@ -40,10 +40,16 @@ body {
   touch-action: none;
 }
 
-.control {
+.controls {
   position: absolute;
   left: 16px;
   bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.control {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -54,4 +60,13 @@ body {
 .control output {
   min-width: 3ch;
   color: #f1f0eb;
+}
+
+.control select {
+  font: inherit;
+  color: #f1f0eb;
+  background: #161922;
+  border: 1px solid #2a2e3a;
+  border-radius: 4px;
+  padding: 2px 6px;
 }

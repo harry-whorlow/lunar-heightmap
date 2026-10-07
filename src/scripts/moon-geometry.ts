@@ -42,6 +42,7 @@ export class MoonGeometry extends THREE.BufferGeometry {
     const count = (cols + 1) * (rows + 1);
     this.directions = new Float32Array(count * 3);
     this.relativeHeights = new Float32Array(count);
+    const heightsKm = new Float32Array(count);
 
     for (let r = 0; r <= rows; r++) {
       const lat = THREE.MathUtils.degToRad(90 - (r / rows) * 180);
@@ -51,7 +52,8 @@ export class MoonGeometry extends THREE.BufferGeometry {
         this.directions[i * 3] = Math.cos(lat) * Math.sin(lon);
         this.directions[i * 3 + 1] = Math.sin(lat);
         this.directions[i * 3 + 2] = Math.cos(lat) * Math.cos(lon);
-        this.relativeHeights[i] = heights[i] / meta.unitsPerKm / meta.radiusKm;
+        heightsKm[i] = heights[i] / meta.unitsPerKm;
+        this.relativeHeights[i] = heightsKm[i] / meta.radiusKm;
       }
     }
 
@@ -70,6 +72,7 @@ export class MoonGeometry extends THREE.BufferGeometry {
     this.setIndex(count > 65535 ? new THREE.Uint32BufferAttribute(indices, 1) : new THREE.Uint16BufferAttribute(indices, 1));
     this.setAttribute("position", new THREE.BufferAttribute(new Float32Array(count * 3), 3));
     this.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(count * 3), 3));
+    this.setAttribute("height", new THREE.BufferAttribute(heightsKm, 1));
     this.setExaggeration(exaggeration);
   }
 

@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { loadHeightMap, MoonGeometry } from "./moon-geometry";
+import { createTopoMaterial } from "./moon-material";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#moon-canvas");
 const exaggerationInput = document.querySelector<HTMLInputElement>("#exaggeration");
 const exaggerationValue = document.querySelector<HTMLOutputElement>("#exaggeration-value");
+const contourInput = document.querySelector<HTMLSelectElement>("#contours");
 
 if (canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -15,10 +17,10 @@ if (canvas) {
   camera.position.set(0, 0, 4);
   scene.add(camera);
 
-  const sun = new THREE.DirectionalLight(0xffffff, 3);
+  const sun = new THREE.DirectionalLight(0xffffff, 2.5);
   sun.position.set(5, 2, -3);
   camera.add(sun);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.08));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.35));
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
@@ -43,7 +45,12 @@ if (canvas) {
   const exaggeration = () => Number(exaggerationInput?.value ?? 10);
   const data = await loadHeightMap();
   const geometry = new MoonGeometry(data, exaggeration());
-  const material = new THREE.MeshStandardMaterial({ color: 0xb8b5ad, roughness: 1, metalness: 0 });
+  const contourInterval = () => Number(contourInput?.value ?? 1);
+  const material = createTopoMaterial({
+    minKm: data.meta.minKm,
+    maxKm: data.meta.maxKm,
+    contourIntervalKm: contourInterval(),
+  });
   scene.add(new THREE.Mesh(geometry, material));
 
   let pending = false;
@@ -56,4 +63,6 @@ if (canvas) {
       pending = false;
     });
   });
+
+  contourInput?.addEventListener("change", () => material.setContourInterval(contourInterval()));
 }
