@@ -1,5 +1,11 @@
 ---
 import "../styles/global.css";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const maps = [
+  { href: "lunar", icon: "moon.svg", name: "Moon", detail: "LRO LOLA · 1,737 km radius" },
+  { href: "mars", icon: "mars.svg", name: "Mars", detail: "MGS MOLA · 3,396 km radius" },
+];
 ---
 
 <!doctype html>
@@ -7,68 +13,27 @@ import "../styles/global.css";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/moon.svg`} />
-    <meta
-      name="description"
-      content="An interactive, three-dimensional study of the lunar surface."
-    />
+    <link rel="icon" type="image/svg+xml" href={`${base}/moon.svg`} />
+    <meta name="description" content="Interactive, three-dimensional height maps of the Moon and Mars." />
     <meta name="theme-color" content="#090b10" />
-    <title>Lunar | height map</title>
+    <title>Height maps</title>
   </head>
   <body>
-    <main class="page-shell">
-      <header class="site-header">
-        
-      </header>
-
-      <section class="hero" aria-label="Lunar height map">
-        <canvas id="moon-canvas"></canvas>
-        <div class="controls">
-          <label class="control">
-            <span>Height exaggeration</span>
-            <input id="exaggeration" type="range" min="1" max="30" step="1" value="4" />
-            <output id="exaggeration-value" for="exaggeration">10×</output>
-          </label>
-
-          <label class="control">
-            <span>Distance</span>
-            <input id="distance" type="range" min="450" max="8500" step="50" value="1300" />
-            <output id="distance-value" for="distance">1,300 km</output>
-          </label>
-
-          <label class="control">
-            <span>Contours</span>
-            <select id="contours">
-              <option value="0">Off</option>
-              <option value="0.25" selected>250 m</option>
-              <option value="0.5">500 m</option>
-              <option value="1" >1 km</option>
-              <option value="2">2 km</option>
-            </select>
-          </label>
-
-          <label class="control">
-            <input id="heatmap" type="checkbox" checked />
-            <span>Heat map</span>
-          </label>
-          <label class="control">
-            <input id="surface" type="checkbox"  />
-            <span>Surface</span>
-          </label>
-          <label class="control" title="Arrows move · Shift + ↑↓ forward / back">
-            <input id="free-cam" type="checkbox" />
-            <span>Free cam</span>
-          </label>
-        </div>
-      </section>
-
-      <footer class="site-footer">
-      
-      </footer>
+    <main class="index">
+      <h1>Height maps</h1>
+      <ul class="map-list">
+        {maps.map(({ href, icon, name, detail }) => (
+          <li>
+            <a class="map-link" href={`${base}/${href}/`}>
+              <img src={`${base}/${icon}`} alt="" width="40" height="40" />
+              <span>
+                <strong>{name}</strong>
+                <small>{detail}</small>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </main>
-
-    <script>
-      import "../scripts/moon";
-    </script>
   </body>
 </html>

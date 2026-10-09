@@ -1,0 +1,106 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  body: "moon" | "mars";
+  radiusKm: number;
+  title: string;
+  label: string;
+  description: string;
+  distance: { min: number; max: number; step: number; value: number };
+  exaggeration?: number;
+  contour?: string;
+}
+
+const {
+  body,
+  radiusKm,
+  title,
+  label,
+  description,
+  distance,
+  exaggeration = 4,
+  contour = "0.25",
+} = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const contours = [
+  ["0", "Off"],
+  ["0.25", "250 m"],
+  ["0.5", "500 m"],
+  ["1", "1 km"],
+  ["2", "2 km"],
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/${body}.svg`} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#090b10" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="site-header">
+
+      </header>
+
+      <section class="hero" aria-label={label}>
+        <canvas id="planet-canvas" data-body={body} data-radius-km={radiusKm}></canvas>
+        <div class="controls">
+          <label class="control">
+            <span>Height exaggeration</span>
+            <input id="exaggeration" type="range" min="1" max="30" step="1" value={exaggeration} />
+            <output id="exaggeration-value" for="exaggeration">{exaggeration}×</output>
+          </label>
+
+          <label class="control">
+            <span>Distance</span>
+            <input
+              id="distance"
+              type="range"
+              min={distance.min}
+              max={distance.max}
+              step={distance.step}
+              value={distance.value}
+            />
+            <output id="distance-value" for="distance">{distance.value.toLocaleString("en")} km</output>
+          </label>
+
+          <label class="control">
+            <span>Contours</span>
+            <select id="contours">
+              {contours.map(([value, text]) => (
+                <option value={value} selected={value === contour}>{text}</option>
+              ))}
+            </select>
+          </label>
+
+          <label class="control">
+            <input id="heatmap" type="checkbox" checked />
+            <span>Heat map</span>
+          </label>
+          <label class="control">
+            <input id="surface" type="checkbox"  />
+            <span>Surface</span>
+          </label>
+          <label class="control" title="Arrows move · Shift + ↑↓ forward / back">
+            <input id="free-cam" type="checkbox" />
+            <span>Free cam</span>
+          </label>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+
+      </footer>
+    </main>
+
+    <script>
+      import "../scripts/planet";
+    </script>
+  </body>
+</html>

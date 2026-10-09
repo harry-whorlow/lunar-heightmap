@@ -1,0 +1,13 @@
+---
+import HeightMap from "../components/HeightMap.astro";
+---
+
+<HeightMap
+  body="mars"
+  radiusKm={3396.19}
+  title="Mars | height map"
+  label="Mars height map"
+  description="An interactive, three-dimensional study of the Martian surface."
+  distance={{ min: 900, max: 16900, step: 100, value: 2600 }}
+  contour="0.5"
+/>

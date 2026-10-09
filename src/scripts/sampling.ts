@@ -1,9 +1,11 @@
 import { closeSync, openSync, readSync } from "node:fs";
 
 export const MOON_RADIUS_KM = 1737.4;
+export const MARS_RADIUS_KM = 3396.19;
 
 const UINT16_OFFSET = 20000;
 const HALF_METRES_PER_KM = 2000;
+const METRES_PER_KM = 1000;
 
 const TAG_IMAGE_WIDTH = 256;
 const TAG_IMAGE_LENGTH = 257;
@@ -12,12 +14,11 @@ const TAG_COMPRESSION = 259;
 const TAG_STRIP_OFFSETS = 273;
 const TAG_SAMPLES_PER_PIXEL = 277;
 const TAG_ROWS_PER_STRIP = 278;
-const TAG_PLANAR_CONFIG = 284;
 const TAG_SAMPLE_FORMAT = 339;
 
 const TYPE_SIZES: Record<number, number> = { 1: 1, 2: 1, 3: 2, 4: 4, 5: 8, 16: 8 };
 
-type PixelFormat = "float32" | "uint16";
+type PixelFormat = "float32" | "uint16" | "int16";
 
 interface TiffLayout {
   width: number;
@@ -98,7 +99,6 @@ function readTiffLayout(fd: number): TiffLayout {
 
   if (get(TAG_COMPRESSION, 1) !== 1) throw new Error("Compressed TIFFs are not supported");
   if (get(TAG_SAMPLES_PER_PIXEL, 1) !== 1) throw new Error("Expected a single-band TIFF");
-  if (get(TAG_PLANAR_CONFIG, 1) !== 1) throw new Error("Expected chunky planar configuration");
 
   const stripOffsets = tags.get(TAG_STRIP_OFFSETS);
   if (!stripOffsets) throw new Error("Tiled TIFFs are not supported (no StripOffsets)");
@@ -106,6 +106,7 @@ function readTiffLayout(fd: number): TiffLayout {
   let format: PixelFormat;
   if (bits === 32 && sampleFormat === 3) format = "float32";
   else if (bits === 16 && sampleFormat === 1) format = "uint16";
+  else if (bits === 16 && sampleFormat === 2) format = "int16";
   else throw new Error(`Unsupported pixel format: ${bits}-bit, SampleFormat ${sampleFormat}`);
 
   return {
@@ -119,7 +120,10 @@ function readTiffLayout(fd: number): TiffLayout {
   };
 }
 
-export function openHeightMap(path: string, rowCacheSize = 256): HeightMapSampler {
+export function openHeightMap(
+  path: string,
+  { radiusKm = MOON_RADIUS_KM, rowCacheSize = 256 } = {},
+): HeightMapSampler {
   const fd = openSync(path, "r");
   let layout: TiffLayout;
   try {
@@ -138,7 +142,9 @@ export function openHeightMap(path: string, rowCacheSize = 256): HeightMapSample
   const toKm =
     format === "float32"
       ? (v: number) => v
-      : (v: number) => (v - UINT16_OFFSET) / HALF_METRES_PER_KM;
+      : format === "int16"
+        ? (v: number) => v / METRES_PER_KM
+        : (v: number) => (v - UINT16_OFFSET) / HALF_METRES_PER_KM;
 
   function readRow(y: number): Float32Array {
     const cached = rowCache.get(y);
@@ -156,6 +162,10 @@ export function openHeightMap(path: string, rowCacheSize = 256): HeightMapSample
     if (format === "float32") {
       for (let x = 0; x < width; x++) {
         row[x] = littleEndian ? rowBuf.readFloatLE(x * 4) : rowBuf.readFloatBE(x * 4);
+      }
+    } else if (format === "int16") {
+      for (let x = 0; x < width; x++) {
+        row[x] = toKm(littleEndian ? rowBuf.readInt16LE(x * 2) : rowBuf.readInt16BE(x * 2));
       }
     } else {
       for (let x = 0; x < width; x++) {
@@ -215,7 +225,7 @@ export function openHeightMap(path: string, rowCacheSize = 256): HeightMapSample
     format,
     samplePixel,
     sample,
-    sampleRadius: (lat, lon) => MOON_RADIUS_KM + sample(lat, lon),
+    sampleRadius: (lat, lon) => radiusKm + sample(lat, lon),
     sampleGrid,
     close: () => {
       rowCache.clear();

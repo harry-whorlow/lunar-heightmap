@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { createCameraRig } from "./camera-rig";
 import { createSpinControls } from "./spin-controls";
-import { loadHeightMap, MoonGeometry } from "./moon-geometry";
-import { createTopoMaterial } from "./moon-material";
+import { HeightMapGeometry, loadHeightMap } from "./height-map-geometry";
+import { createTopoMaterial } from "./topo-material";
 
-const canvas = document.querySelector<HTMLCanvasElement>("#moon-canvas");
+const canvas = document.querySelector<HTMLCanvasElement>("#planet-canvas");
 const exaggerationInput =
   document.querySelector<HTMLInputElement>("#exaggeration");
 const exaggerationValue = document.querySelector<HTMLOutputElement>(
@@ -18,9 +18,10 @@ const distanceInput = document.querySelector<HTMLInputElement>("#distance");
 const distanceValue =
   document.querySelector<HTMLOutputElement>("#distance-value");
 
-const MOON_RADIUS_KM = 1737.4;
-
 if (canvas) {
+  const body = canvas.dataset.body ?? "moon";
+  const radiusKm = Number(canvas.dataset.radiusKm);
+
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -46,17 +47,17 @@ if (canvas) {
 
   const altitudeKm = () => Number(distanceInput?.value ?? 1300);
   const updateDistance = () => {
-    rig.setDistance(1 + altitudeKm() / MOON_RADIUS_KM);
+    rig.setDistance(1 + altitudeKm() / radiusKm);
     if (distanceValue) {
-      distanceValue.value = `${altitudeKm().toLocaleString()} km`;
+      distanceValue.value = `${altitudeKm().toLocaleString("en")} km`;
     }
   };
   distanceInput?.addEventListener("input", updateDistance);
   updateDistance();
 
-  const moon = new THREE.Group();
-  scene.add(moon);
-  const spin = createSpinControls(moon, camera, canvas, { autoSpeed: 0.02 });
+  const planet = new THREE.Group();
+  scene.add(planet);
+  const spin = createSpinControls(planet, camera, canvas, { autoSpeed: 0.02 });
 
   const resize = () => {
     const { clientWidth, clientHeight } = canvas;
@@ -77,8 +78,8 @@ if (canvas) {
   });
 
   const exaggeration = () => Number(exaggerationInput?.value ?? 10);
-  const data = await loadHeightMap();
-  const geometry = new MoonGeometry(data, exaggeration());
+  const data = await loadHeightMap(body);
+  const geometry = new HeightMapGeometry(data, exaggeration());
   const contourInterval = () => Number(contourInput?.value ?? 1);
   const material = createTopoMaterial({
     heightMap: geometry.heightTexture,
@@ -88,7 +89,7 @@ if (canvas) {
     heatmap: heatmapInput?.checked ?? true,
     surface: surfaceInput?.checked ?? true,
   });
-  moon.add(new THREE.Mesh(geometry, material));
+  planet.add(new THREE.Mesh(geometry, material));
 
   let pending = false;
   exaggerationInput?.addEventListener("input", () => {

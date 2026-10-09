@@ -18,9 +18,10 @@ export interface HeightMapData {
 }
 
 export async function loadHeightMap(
+  body = "moon",
   baseUrl = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/data`,
 ): Promise<HeightMapData> {
-  const meta: HeightMapMeta = await (await fetch(`${baseUrl}/moon.json`)).json();
+  const meta: HeightMapMeta = await (await fetch(`${baseUrl}/${body}.json`)).json();
   const buffer = await (await fetch(`${baseUrl}/${meta.file}`)).arrayBuffer();
   const heights = new Int16Array(buffer);
   if (heights.length !== meta.vertexCount) {
@@ -29,7 +30,7 @@ export async function loadHeightMap(
   return { meta, heights };
 }
 
-export class MoonGeometry extends THREE.BufferGeometry {
+export class HeightMapGeometry extends THREE.BufferGeometry {
   readonly cols: number;
   readonly rows: number;
   readonly heightTexture: THREE.DataTexture;
